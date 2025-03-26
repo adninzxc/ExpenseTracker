@@ -1,10 +1,7 @@
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class TransactionStorage {
     private static final List<Transaction> transactions = new ArrayList<>();
@@ -129,5 +126,41 @@ public class TransactionStorage {
         } catch (IOException e) {
             System.out.println("Error writing to file: " + e.getMessage());
         }
+    }
+
+    public static double summaryByMonth(int month) {
+        double total = 0.0;
+        Calendar cal = Calendar.getInstance();
+        int currentYear = cal.get(Calendar.YEAR);
+
+        for (Transaction transaction : transactions) {
+            cal.setTime(transaction.date());
+            int transactionMonth = cal.get(Calendar.MONTH) + 1;
+            int transactionYear = cal.get(Calendar.YEAR);
+
+            if (transactionMonth == month && transactionYear == currentYear) {
+                total += transaction.amount();
+            }
+        }
+
+        return total;
+    }
+
+    public static List<Transaction> getTransactionsByMonth(int month) {
+        List<Transaction> result = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        int currentYear = cal.get(Calendar.YEAR);
+
+        for (Transaction transaction : transactions) {
+            cal.setTime(transaction.date());
+            int transactionMonth = cal.get(Calendar.MONTH) + 1;
+            int transactionYear = cal.get(Calendar.YEAR);
+
+            if (transactionMonth == month && transactionYear == currentYear) {
+                result.add(transaction);
+            }
+        }
+
+        return result;
     }
 }
