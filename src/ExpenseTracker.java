@@ -24,7 +24,21 @@ public class ExpenseTracker {
                 case "update" -> TransactionManager.updateExpense(scanner, filename);
                 case "delete" -> TransactionManager.deleteExpense(scanner, filename);
                 case "list" -> TransactionManager.listTransactions();
-                case "budget" -> TransactionManager.setBudget(scanner);
+                case "budget" -> {
+                    System.out.println("\nBudget Options:");
+                    System.out.println("1 - Set overall budget");
+                    System.out.println("2 - Set monthly budget");
+                    System.out.println("3 - View monthly budgets");
+                    System.out.print("Select an option (1-3): ");
+
+                    String option = scanner.nextLine().trim();
+                    switch (option) {
+                        case "1" -> TransactionManager.setBudget(scanner);
+                        case "2" -> TransactionManager.setMonthlyBudget(scanner);
+                        case "3" -> TransactionManager.showMonthlyBudgets();
+                        default -> System.out.println("Invalid option.");
+                    }
+                }
                 case "summary" -> {
                     System.out.printf(Locale.US, "Total expenses: $%.2f%n", TransactionStorage.summary());
 
@@ -63,8 +77,24 @@ public class ExpenseTracker {
                                 for (TransactionStorage.Transaction transaction : monthlyTransactions) {
                                     System.out.println(transaction);
                                 }
-                                System.out.println(String.format(Locale.US,
-                                        "Total for month %d: $%.2f", month, TransactionStorage.summaryByMonth(month)));
+
+                                double monthlyTotal = TransactionStorage.summaryByMonth(month);
+                                System.out.printf(Locale.US, "Total for month %d: $%.2f%n", month, monthlyTotal);
+
+                                if (TransactionStorage.hasMonthlyBudget(month)) {
+                                    double budget = TransactionStorage.getMonthlyBudget(month);
+                                    System.out.printf(Locale.US, "Budget for month %d: $%.2f%n", month, budget);
+
+                                    double remaining = budget - monthlyTotal;
+                                    if (remaining >= 0) {
+                                        System.out.printf(Locale.US, "Remaining budget: $%.2f%n", remaining);
+                                    } else {
+                                        System.out.printf(Locale.US, "Over budget by: $%.2f%n", Math.abs(remaining));
+                                        System.out.println(TransactionStorage.monthlyWarning(month));
+                                    }
+                                } else {
+                                    System.out.println("No budget set for this month.");
+                                }
                             }
                         }
                     } catch (NumberFormatException e) {
@@ -98,7 +128,7 @@ public class ExpenseTracker {
         System.out.println("  update  - Update an expense by ID");
         System.out.println("  delete  - Delete an expense by ID");
         System.out.println("  list    - List all expenses");
-        System.out.println("  budget  - Set a budget limit for expenses");
+        System.out.println("  budget  - Budget management (overall and monthly)");
         System.out.println("  summary - Show the total sum of all expenses");
         System.out.println("  month   - View expenses for a specific month of the current year");
         System.out.println("  export  - Export all expenses to a CSV file");

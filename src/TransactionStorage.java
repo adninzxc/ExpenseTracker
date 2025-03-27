@@ -7,6 +7,7 @@ public class TransactionStorage {
     private static final List<Transaction> transactions = new ArrayList<>();
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
     private static double budgetLimit = 0.0;
+    private static final Map<Integer, Double> monthlyBudgets = new HashMap<>();
 
     public record Transaction(int id, Date date, String description, double amount) {
 
@@ -61,9 +62,48 @@ public class TransactionStorage {
         return budgetLimit;
     }
 
+    public static void setMonthlyBudget(int month, double limit) {
+        if (month >= 1 && month <= 12) {
+            monthlyBudgets.put(month, limit);
+        }
+    }
+
+    public static double getMonthlyBudget(int month) {
+        return monthlyBudgets.getOrDefault(month, 0.0);
+    }
+
+    public static Map<Integer, Double> getAllMonthlyBudgets() {
+        return monthlyBudgets;
+    }
+
+    public static boolean hasMonthlyBudget(int month) {
+        return monthlyBudgets.containsKey(month) && monthlyBudgets.get(month) > 0;
+    }
+
     public static String warning() {
         if (budgetLimit > 0 && summary() > budgetLimit) {
-            return "Warning, you have reached or exceeded the budget!";
+            return "Warning, you have reached or exceeded the overall budget!";
+        }
+        return "";
+    }
+
+    public static String monthlyWarning() {
+        Calendar cal = Calendar.getInstance();
+        int currentMonth = cal.get(Calendar.MONTH) + 1;
+
+        return monthlyWarning(currentMonth);
+    }
+
+    public static String monthlyWarning(int month) {
+        if (hasMonthlyBudget(month)) {
+            double monthlyTotal = summaryByMonth(month);
+            double monthBudget = getMonthlyBudget(month);
+
+            if (monthlyTotal > monthBudget) {
+                return String.format(Locale.US,
+                        "Warning, you have exceeded the budget for month %d! (Budget: $%.2f, Spent: $%.2f)",
+                        month, monthBudget, monthlyTotal);
+            }
         }
         return "";
     }
