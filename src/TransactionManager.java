@@ -1,5 +1,6 @@
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class TransactionManager {
@@ -36,6 +37,11 @@ public class TransactionManager {
         String warning = TransactionStorage.warning();
         if (!warning.isEmpty()) {
             System.out.println(warning);
+        }
+
+        String monthlyWarning = TransactionStorage.monthlyWarning();
+        if (!monthlyWarning.isEmpty()) {
+            System.out.println(monthlyWarning);
         }
     }
 
@@ -86,6 +92,11 @@ public class TransactionManager {
         String warning = TransactionStorage.warning();
         if (!warning.isEmpty()) {
             System.out.println(warning);
+        }
+
+        String monthlyWarning = TransactionStorage.monthlyWarning();
+        if (!monthlyWarning.isEmpty()) {
+            System.out.println(monthlyWarning);
         }
     }
 
@@ -144,7 +155,7 @@ public class TransactionManager {
     }
 
     public static void setBudget(Scanner scanner) {
-        System.out.print("Enter budget limit: ");
+        System.out.print("Enter overall budget limit: ");
 
         double limit = 0.0;
         boolean validInput = false;
@@ -162,11 +173,80 @@ public class TransactionManager {
         }
 
         TransactionStorage.setBudget(limit);
-        System.out.printf("Budget set to $%.2f%n", limit);
+        System.out.printf("Overall budget set to $%.2f%n", limit);
 
         String warning = TransactionStorage.warning();
         if (!warning.isEmpty()) {
             System.out.println(warning);
+        }
+    }
+
+    public static void setMonthlyBudget(Scanner scanner) {
+        System.out.print("Enter month (1-12): ");
+        int month;
+        try {
+            month = Integer.parseInt(scanner.nextLine().trim());
+            if (month < 1 || month > 12) {
+                System.out.println("Invalid month. Please enter a number between 1 and 12.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid month number.");
+            return;
+        }
+
+        System.out.print("Enter budget limit for month " + month + ": ");
+
+        double limit = 0.0;
+        boolean validInput = false;
+
+        while (!validInput) {
+            if (scanner.hasNextDouble()) {
+                limit = scanner.nextDouble();
+                scanner.nextLine();
+                validInput = true;
+            } else {
+                System.out.println("Invalid amount. Please enter a valid number.");
+                scanner.next();
+                scanner.nextLine();
+            }
+        }
+
+        TransactionStorage.setMonthlyBudget(month, limit);
+        System.out.printf("Budget for month %d set to $%.2f%n", month, limit);
+
+        String warning = TransactionStorage.monthlyWarning(month);
+        if (!warning.isEmpty()) {
+            System.out.println(warning);
+        }
+    }
+
+    public static void showMonthlyBudgets() {
+        Map<Integer, Double> budgets = TransactionStorage.getAllMonthlyBudgets();
+
+        if (budgets.isEmpty()) {
+            System.out.println("No monthly budgets have been set.");
+            return;
+        }
+
+        System.out.println("\nMonthly Budgets:");
+        System.out.println("Month  | Budget      | Spent       | Remaining   | Status");
+        System.out.println("-------|-------------|-------------|-------------|-------");
+
+        String[] monthNames = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+        for (int month = 1; month <= 12; month++) {
+            if (budgets.containsKey(month)) {
+                double budget = budgets.get(month);
+                double spent = TransactionStorage.summaryByMonth(month);
+                double remaining = budget - spent;
+                String status = remaining >= 0 ? "OK" : "OVER BUDGET";
+
+                System.out.printf("%-6s | $%-10.2f | $%-10.2f | $%-10.2f | %s%n",
+                        monthNames[month-1], budget, spent,
+                        remaining >= 0 ? remaining : 0.0, status);
+            }
         }
     }
 }
