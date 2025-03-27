@@ -24,8 +24,26 @@ public class ExpenseTracker {
                 case "update" -> TransactionManager.updateExpense(scanner, filename);
                 case "delete" -> TransactionManager.deleteExpense(scanner, filename);
                 case "list" -> TransactionManager.listTransactions();
-                case "summary" -> System.out.printf(Locale.US, "Total expenses: $%.2f%n",
-                        TransactionStorage.summary());
+                case "budget" -> TransactionManager.setBudget(scanner);
+                case "summary" -> {
+                    System.out.printf(Locale.US, "Total expenses: $%.2f%n", TransactionStorage.summary());
+
+                    double budget = TransactionStorage.getBudget();
+                    if (budget > 0) {
+                        System.out.printf(Locale.US, "Budget limit: $%.2f%n", budget);
+                        double remaining = budget - TransactionStorage.summary();
+                        if (remaining >= 0) {
+                            System.out.printf(Locale.US, "Remaining budget: $%.2f%n", remaining);
+                        } else {
+                            System.out.printf(Locale.US, "Over budget by: $%.2f%n", Math.abs(remaining));
+                        }
+                    }
+
+                    String warning = TransactionStorage.warning();
+                    if (!warning.isEmpty()) {
+                        System.out.println(warning);
+                    }
+                }
                 case "month" -> {
                     System.out.print("Enter month (1-12): ");
 
@@ -65,7 +83,6 @@ public class ExpenseTracker {
                     TransactionStorage.exportTransactionsToCSV(exportFilename);
                 }
                 default -> {
-
                     if (!input.isEmpty()) {
                         System.out.println("Unknown command. Type 'help' for available commands.");
                     }
@@ -81,6 +98,7 @@ public class ExpenseTracker {
         System.out.println("  update  - Update an expense by ID");
         System.out.println("  delete  - Delete an expense by ID");
         System.out.println("  list    - List all expenses");
+        System.out.println("  budget  - Set a budget limit for expenses");
         System.out.println("  summary - Show the total sum of all expenses");
         System.out.println("  month   - View expenses for a specific month of the current year");
         System.out.println("  export  - Export all expenses to a CSV file");

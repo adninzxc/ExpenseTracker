@@ -32,6 +32,11 @@ public class TransactionManager {
 
         TransactionStorage.saveTransactionsToFile(filename);
         System.out.println("Transaction added with ID: " + transactionId);
+
+        String warning = TransactionStorage.warning();
+        if (!warning.isEmpty()) {
+            System.out.println(warning);
+        }
     }
 
     static void updateExpense(Scanner scanner, String filename) {
@@ -77,6 +82,11 @@ public class TransactionManager {
         TransactionStorage.saveTransactionsToFile(filename);
 
         System.out.println("Expense updated successfully!");
+
+        String warning = TransactionStorage.warning();
+        if (!warning.isEmpty()) {
+            System.out.println(warning);
+        }
     }
 
     static void deleteExpense(Scanner scanner, String filename) {
@@ -131,5 +141,32 @@ public class TransactionManager {
             }
         }
         return maxId + 1;
+    }
+
+    public static void setBudget(Scanner scanner) {
+        System.out.print("Enter budget limit: ");
+
+        double limit = 0.0;
+        boolean validInput = false;
+
+        while (!validInput) {
+            if (scanner.hasNextDouble()) {
+                limit = scanner.nextDouble();
+                scanner.nextLine();
+                validInput = true;
+            } else {
+                System.out.println("Invalid amount. Please enter a valid number.");
+                scanner.next();
+                scanner.nextLine();
+            }
+        }
+
+        TransactionStorage.setBudget(limit);
+        System.out.printf("Budget set to $%.2f%n", limit);
+
+        String warning = TransactionStorage.warning();
+        if (!warning.isEmpty()) {
+            System.out.println(warning);
+        }
     }
 }

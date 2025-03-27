@@ -6,16 +6,17 @@ import java.util.*;
 public class TransactionStorage {
     private static final List<Transaction> transactions = new ArrayList<>();
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.US);
+    private static double budgetLimit = 0.0;
 
     public record Transaction(int id, Date date, String description, double amount) {
 
         @Override
-            public String toString() {
-                SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-                return String.format(Locale.US, "# %d - %s - %s -   $%.2f",
-                        id, simpleFormat.format(date), description, amount);
-            }
+        public String toString() {
+            SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            return String.format(Locale.US, "# %d - %s - %s -   $%.2f",
+                    id, simpleFormat.format(date), description, amount);
         }
+    }
 
     public static List<Transaction> getAllTransactions() {
         return transactions;
@@ -51,6 +52,22 @@ public class TransactionStorage {
 
         return total;
     }
+
+    public static void setBudget(double limit) {
+        budgetLimit = limit;
+    }
+
+    public static double getBudget() {
+        return budgetLimit;
+    }
+
+    public static String warning() {
+        if (budgetLimit > 0 && summary() > budgetLimit) {
+            return "Warning, you have reached or exceeded the budget!";
+        }
+        return "";
+    }
+
     public static void loadTransactionsFromFile(String filename) {
         transactions.clear();
 
