@@ -28,6 +28,7 @@ public class ExpenseTracker {
                         TransactionStorage.summary());
                 case "month" -> {
                     System.out.print("Enter month (1-12): ");
+
                     try {
                         int month = Integer.parseInt(scanner.nextLine().trim());
                         if (month < 1 || month > 12) {
@@ -52,6 +53,17 @@ public class ExpenseTracker {
                         System.out.println("Invalid input. Please enter a number.");
                     }
                 }
+                case "export" -> {
+                    System.out.print("Enter filename for CSV export (or press Enter for default 'expenses.csv'): ");
+                    String exportFilename = scanner.nextLine().trim();
+                    if (exportFilename.isEmpty()) {
+                        exportFilename = "expenses.csv";
+                    }
+                    if (!exportFilename.toLowerCase().endsWith(".csv")) {
+                        exportFilename += ".csv";
+                    }
+                    TransactionStorage.exportTransactionsToCSV(exportFilename);
+                }
                 default -> {
 
                     if (!input.isEmpty()) {
@@ -71,6 +83,7 @@ public class ExpenseTracker {
         System.out.println("  list    - List all expenses");
         System.out.println("  summary - Show the total sum of all expenses");
         System.out.println("  month   - View expenses for a specific month of the current year");
+        System.out.println("  export  - Export all expenses to a CSV file");
         System.out.println("  help    - Show this help message");
         System.out.println("  exit    - Quit the application");
     }
