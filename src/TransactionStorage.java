@@ -163,4 +163,28 @@ public class TransactionStorage {
 
         return result;
     }
+
+    public static void exportTransactionsToCSV(String filename) {
+        try (FileWriter fileWriter = new FileWriter(filename);
+             PrintWriter printWriter = new PrintWriter(fileWriter)) {
+
+            printWriter.println("ID,Date,Description,Amount");
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            for (Transaction transaction : transactions) {
+                String formattedDate = dateFormat.format(transaction.date());
+                String escapedDescription = transaction.description().contains(",") ?
+                        "\"" + transaction.description() + "\"" : transaction.description();
+
+                printWriter.printf(Locale.US, "%d,%s,%s,%.2f%n",
+                        transaction.id(),
+                        formattedDate,
+                        escapedDescription,
+                        transaction.amount());
+            }
+            System.out.println("Transactions exported to " + filename);
+        } catch (IOException e) {
+            System.out.println("Error exporting to CSV: " + e.getMessage());
+        }
+    }
 }
